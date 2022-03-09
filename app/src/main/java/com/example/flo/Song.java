@@ -7,15 +7,15 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class Song implements Runnable {
-    String singer;
-    String album;
-    String title;
-    String duration;
-    String imageURL;
-    String fileURL;
-    ArrayList<String> lyrics = new ArrayList<>();
-    ArrayList<String> lyricsTime = new ArrayList<>();
+public class Song {
+    private String singer;
+    private String album;
+    private String title;
+    private String duration;
+    private String imageURL;
+    private String fileURL;
+    private ArrayList<String> lyrics = new ArrayList<>();
+    private ArrayList<String> lyricsTime = new ArrayList<>();
 
     MediaPlayer mediaPlayer;
 
@@ -105,10 +105,5 @@ public class Song implements Runnable {
 
     public void setLyricsTime(ArrayList<String> lyricsTime) {
         this.lyricsTime = lyricsTime;
-    }
-
-    @Override
-    public void run() {
-
     }
 }
