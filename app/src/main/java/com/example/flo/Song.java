@@ -12,7 +12,8 @@ public class Song {
     String duration;
     String imageURL;
     String fileURL;
-    ArrayList<Time> lyrics;
+    ArrayList<String> lyrics = new ArrayList<>();
+    ArrayList<String> lyricsTime = new ArrayList<>();
 
     public Song(JSONObject jsonObject) {
         try {
@@ -23,6 +24,12 @@ public class Song {
             this.imageURL = jsonObject.getString("image");
             this.fileURL = jsonObject.getString("file");
             String[] src = jsonObject.getString("lyrics").split("\\n");
+            for(int i = 0; i < src.length; i++) {
+                src[i] = src[i].replaceAll("\\[", "");
+                String[] ls = src[i].split("]");
+                lyrics.add(ls[1]);
+                lyricsTime.add(ls[0]);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -76,11 +83,23 @@ public class Song {
         this.fileURL = fileURL;
     }
 
-    public ArrayList<Time> getLyrics() {
-        return lyrics;
+    public String getLyrics() {
+        String lSrc = null;
+        for(String x : lyrics) {
+            lSrc += x + "\n";
+        }
+        return lSrc;
     }
 
-    public void setLyrics(ArrayList<Time> lyrics) {
+    public void setLyrics(ArrayList<String> lyrics) {
         this.lyrics = lyrics;
+    }
+
+    public ArrayList<String> getLyricsTime() {
+        return lyricsTime;
+    }
+
+    public void setLyricsTime(ArrayList<String> lyricsTime) {
+        this.lyricsTime = lyricsTime;
     }
 }
