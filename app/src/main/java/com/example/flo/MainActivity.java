@@ -1,5 +1,7 @@
 package com.example.flo;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -7,6 +9,7 @@ import android.content.DialogInterface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -27,7 +30,7 @@ import java.io.UnsupportedEncodingException;
 
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Runnable {
 
     private final String URL = "https://grepp-programmers-challenges.s3.ap-northeast-2.amazonaws.com/2020-flo/song.json";
     private String musicURL;
@@ -51,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
     private int position = 0;
     private int currentPosition = 0;
 
+    private int seekerBarPosition = 0;
+
+    private Thread thread;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
                             musicPlay.setOnClickListener(new ImageButton.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
+                                    System.out.println("play button");
                                     if(!playButton) {
                                         musicPlay.setImageResource(R.drawable.stop);
                                         if(!init) {
@@ -107,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                                     } else {
                                         musicPlay.setImageResource(R.drawable.play);
                                         position = mediaPlayer.getCurrentPosition();
+                                        System.out.println(position);
                                         mediaPlayer.pause();
                                         playButton = false;
                                     }
@@ -125,6 +133,50 @@ public class MainActivity extends AppCompatActivity {
                                     lyricsDialog.show();
                                 }
                             });
+
+                            musicSeekBar.setMax(Integer.parseInt(song.getDuration()));
+                            musicSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                                public void onStopTrackingTouch(SeekBar seekBar) {
+                                }
+
+                                public void onStartTrackingTouch(SeekBar seekBar) {
+                                }
+
+                                public void onProgressChanged(SeekBar seekBar, int progress,
+                                                              boolean fromUser) {
+                                    if(fromUser) {
+                                        mediaPlayer.seekTo(progress*1000);
+                                        position = progress;
+                                        seekerBarPosition = progress;
+
+                                    }
+                                }
+                            });
+                            thread = new Thread(new Runnable(){  // 쓰레드 생성
+                                @Override
+                                public void run() {
+                                    while(true){  // 음악이 실행중일때 계속 돌아가게 함
+                                        try{
+                                            Thread.sleep(1000); // 1초마다 시크바 움직이게 함
+                                        } catch(Exception e){
+                                            e.printStackTrace();
+                                        }
+                                        seekerBarPosition = mediaPlayer.getCurrentPosition()/1000;
+                                        // 현재 재생중인 위치를 가져와 시크바에 적용
+                                        musicSeekBar.setProgress(seekerBarPosition);
+                                        if(seekerBarPosition == Integer.parseInt(song.getDuration())) {
+                                            seekerBarPosition = 0;
+                                            musicSeekBar.setProgress(seekerBarPosition);
+                                            musicPlay.setImageResource(R.drawable.play);
+                                            position = mediaPlayer.getCurrentPosition();
+                                            mediaPlayer.pause();
+                                            playButton = false;
+                                            init = false;
+                                        }
+                                    }
+                                }
+                            });
+                            thread.start();
                         } catch (JSONException | IOException e) {
                             e.printStackTrace();
                         }
@@ -153,4 +205,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void run() {
+        try {
+            Thread.sleep(1000);
+        }catch(Exception e) {
+        }
+    }
 }

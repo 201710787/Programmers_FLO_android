@@ -1,11 +1,13 @@
 package com.example.flo;
 
+import android.media.MediaPlayer;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class Song {
+public class Song implements Runnable {
     String singer;
     String album;
     String title;
@@ -14,6 +16,8 @@ public class Song {
     String fileURL;
     ArrayList<String> lyrics = new ArrayList<>();
     ArrayList<String> lyricsTime = new ArrayList<>();
+
+    MediaPlayer mediaPlayer;
 
     public Song(JSONObject jsonObject) {
         try {
@@ -84,7 +88,7 @@ public class Song {
     }
 
     public String getLyrics() {
-        String lSrc = null;
+        String lSrc = "";
         for(String x : lyrics) {
             lSrc += x + "\n";
         }
@@ -101,5 +105,10 @@ public class Song {
 
     public void setLyricsTime(ArrayList<String> lyricsTime) {
         this.lyricsTime = lyricsTime;
+    }
+
+    @Override
+    public void run() {
+
     }
 }
