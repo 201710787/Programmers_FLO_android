@@ -9,6 +9,8 @@ import android.content.DialogInterface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -56,7 +58,9 @@ public class MainActivity extends AppCompatActivity {
 
     private int seekerBarPosition = 0;
 
-    private Thread thread;
+    private Thread thread_1;
+    private Thread thread_2;
+    int t = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
                             musicPlay.setOnClickListener(new ImageButton.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    System.out.println("play button");
                                     if(!playButton) {
                                         musicPlay.setImageResource(R.drawable.stop);
                                         if(!init) {
@@ -125,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                                 public void onClick(View view) {
                                     AlertDialog.Builder lyricsDialog = new AlertDialog.Builder(MainActivity.this);
                                     lyricsDialog.setTitle("가사"); //제목
-                                    lyricsDialog.setMessage(song.getLyrics()); // 메시지
+                                    lyricsDialog.setMessage(song.getLyricsForDialog()); // 메시지
                                     lyricsDialog.setPositiveButton("확인",new DialogInterface.OnClickListener(){
                                         public void onClick(DialogInterface dialog, int which) {
                                         }
@@ -152,16 +155,31 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                             });
-                            thread = new Thread(new Runnable(){  // 쓰레드 생성
+                            final Handler handler = new Handler()
+                            {
+
+                                public void handleMessage(Message msg)
+                                {
+                                    if(song.getPrintLyrics().containsKey(seekerBarPosition)) {
+                                        musicLyrics.setText(song.getPrintLyrics().get(seekerBarPosition));
+                                    }
+                                }
+
+                            };
+                            thread_1 = new Thread(new Runnable(){  // 쓰레드 생성
                                 @Override
                                 public void run() {
                                     while(true){  // 음악이 실행중일때 계속 돌아가게 함
                                         try{
-                                            Thread.sleep(1000); // 1초마다 시크바 움직이게 함
+                                            Thread.sleep(500); // 0.5초마다 시크바 움직이게 함
                                         } catch(Exception e){
                                             e.printStackTrace();
                                         }
                                         seekerBarPosition = mediaPlayer.getCurrentPosition()/1000;
+
+                                        Message msg = handler.obtainMessage();
+                                        handler.sendMessage(msg);
+
                                         // 현재 재생중인 위치를 가져와 시크바에 적용
                                         musicSeekBar.setProgress(seekerBarPosition);
                                         if(seekerBarPosition == Integer.parseInt(song.getDuration())) {
@@ -176,7 +194,8 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                             });
-                            thread.start();
+
+                            thread_1.start();
                         } catch (JSONException | IOException e) {
                             e.printStackTrace();
                         }
