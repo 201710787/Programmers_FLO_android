@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@color/purple_500"
+    >
 
     <TextView
         android:id="@+id/music_title"
@@ -17,6 +19,7 @@
         app:layout_constraintVertical_bias="0.2"
         android:textSize="24sp"
         android:padding="5dp"
+        android:textStyle="bold"
         />
     <TextView
         android:id="@+id/music_singer"
